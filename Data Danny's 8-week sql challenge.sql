@@ -104,11 +104,44 @@ SELECT Number, Item_purchased
 FROM cte_item_purchased  
 ORDER BY Number DESC;
 
-select * from sales, menu, members;	
+
 -- 5. Which item was the most popular for each customer?
+-- Step 1. CTE to get count of each product
+-- Step 2. CTE to calculate max product count
+-- Step 3: Select Maximum product
+WITH ProductCounts AS (
+	SELECT 
+		s.customer_id
+		,m.product_id
+		,m.product_name
+		,COUNT(m.product_id) AS ProductCount
+	FROM sales s
+	JOIN menu m
+	ON s.product_id = m.product_id
+	GROUP BY 	s.customer_id, m.product_id, m.product_name
+),
+
+MaxProductCounts AS (
+	SELECT
+		customer_id
+		,MAX(ProductCount) AS MaxCount
+	FROM ProductCounts
+	GROUP BY customer_id
+)
+SELECT
+	pc.customer_id
+	,pc.product_id
+	,pc.product_name
+	,pc.ProductCount
+	
+FROM ProductCounts pc
+JOIN MaxProductCounts mpc
+ON pc.customer_id = mpc.customer_id AND pc.ProductCount = mpc.MaxCount
+ORDER BY pc.customer_id;
 
 
 -- 6. Which item was purchased first by the customer after they became a member?
+select * from sales, menu, members;	
 
 
 -- 7. Which item was purchased just before the customer became a member?
